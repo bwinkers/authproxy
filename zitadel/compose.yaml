@@ -1,0 +1,28 @@
+services:
+  zitadel:
+    restart: 'no'
+    image: 'ghcr.io/zitadel/zitadel:latest'
+    command: 'start-from-setup --masterkey "${ZITADEL_MASTERKEY}" --tlsMode external'
+    environment:
+      ZITADEL_DATABASE_POSTGRES_HOST: 172.17.0.1
+      ZITADEL_DATABASE_POSTGRES_DATABASE: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_USERNAME: zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: ${ZITADEL_POSTGRES_PASSWORD}
+      ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE: disable
+      ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME: postgres
+      ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD: ${POSTGRES_PASSWORD}
+      ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE: disable
+      # ZITADEL_EXTERNALSECURE: false
+      # Use SSL Proxy
+      ZITADEL_EXTERNALDOMAIN: 'auth.ultri.net'
+      ZITADEL_EXTERNALPORT: 443
+      ZITADEL_EXTERNALSECURE: true
+      ZITADEL_TLS_ENABLED: false
+    networks:
+      - auth_proxy
+    ports:
+      - '8080:8080'
+networks:
+  auth_proxy:
+    external: false
+    driver: bridge

@@ -1,0 +1,49 @@
+services:
+  # bastion:
+  #   build: ./bastion/
+  #   networks:
+  #     - zitadel_auth
+  #   ports:
+  #     - "2222:22"
+  #   # `ssh root@localhost -p 2222`
+  #   # `psql -h postgres -U postgres` # Use POSTGRES_PASSWORD from .env
+  zitadel:
+    restart: 'unless-stopped'
+    image: 'ghcr.io/zitadel/zitadel:latest'
+    # command: 'start-from-init --masterkey "${ZITADEL_MASTERKEY}" --tlsMode external'
+    command: 'start-from-setup --masterkey "${ZITADEL_MASTERKEY}" --tlsMode external'
+    environment:
+      ZITADEL_DATABASE_POSTGRES_HOST: 172.17.0.1
+      ZITADEL_DATABASE_POSTGRES_PORT: 5432
+      ZITADEL_DATABASE_POSTGRES_DATABASE: securelogin_zitadel
+      ZITADEL_DATABASE_POSTGRES_USER_USERNAME: zitadel_securelogin
+      ZITADEL_DATABASE_POSTGRES_USER_PASSWORD: ${ZITADEL_POSTGRES_PASSWORD}
+      ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE: disable
+      ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME: postgres
+      ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD: ${POSTGRES_PASSWORD}
+      ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE: disable
+      # ZITADEL_EXTERNALSECURE: false
+      ZITADEL_EXTERNALDOMAIN: 'my.securelogin.app'
+      ZITADEL_EXTERNALPORT: 443
+      ZITADEL_EXTERNALSECURE: true
+      ZITADEL_TLS_ENABLED: false
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_FROM: 'support@securelogin.app'
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_FROMNAME: 'SecureLogin.app'
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_SMTP_HOST: 'smtp.titan.email:465'
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_SMTP_USER: 'support@securelogin.app'
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_SMTP_PASSWORD: 'f&psz)C?Z_DvV2G'
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_TLS: true
+      ZITADEL_DEFAULTINSTANCE_DOMAINPOLICY_SMTPSENDERADDRESSMATCHESINSTANCEDOMAIN: false
+
+      ZITADEL_FIRSTINSTANCE_ORG_HUMAN_USERNAME: 'support@securelogin.app'
+      ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORD: 'MyComplexP4sswurd!'
+      ZITADEL_FIRSTINSTANCE_ORG_NAME: 'SecureLogin'
+    networks:
+      - zitadel_auth
+    ports:
+      - '127.0.0.1:8088:8080'
+
+networks:
+  zitadel_auth:
+    external: false
+    driver: bridge
